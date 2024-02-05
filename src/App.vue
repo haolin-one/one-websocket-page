@@ -1,7 +1,7 @@
 <!--
  * @Date: 2024-02-02 10:20:42
  * @LastEditors: wanghaolin howlingone@163.com
- * @LastEditTime: 2024-02-02 16:03:24
+ * @LastEditTime: 2024-02-05 13:56:13
 -->
 <script setup lang="ts">
 import { onUnmounted, reactive, ref } from "vue";
@@ -27,6 +27,16 @@ import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
 import { CopyOutline } from "@vicons/ionicons5";
 import ContentMessage from "./components/ContentMessage.vue";
+// import { useClipboardItems, usePermission } from "@vueuse/core";
+import Clipboard from "clipboard";
+
+const clipboard = new Clipboard(".n-icon");
+clipboard.on("success", () => {
+  window.$message.success("复制成功");
+});
+
+// usePermission("clipboard-read");
+// usePermission("clipboard-write");
 
 hljs.registerLanguage("json", json);
 
@@ -74,11 +84,23 @@ function handleClear(): void {
   window.$message.success("清空成功");
 }
 
-function handleCopy(message: string) {
-  navigator.clipboard.writeText(message).then(() => {
-    window.$message.success("复制成功");
-  });
-}
+// const { copy } = useClipboardItems();
+// function createClipboardItems(text: string) {
+//   const mime = "text/html";
+//   const blob = new Blob([text], { type: mime });
+//   return new ClipboardItem({
+//     [mime]: blob,
+//   });
+// }
+
+// function handleCopy(message: string) {
+//   // navigator.clipboard.writeText(message).then(() => {
+//   //   window.$message.success("复制成功");
+//   // });
+//   console.log([createClipboardItems(message)]);
+
+//   copy([createClipboardItems(message)]);
+// }
 
 onUnmounted(() => {
   handleClose();
@@ -107,7 +129,11 @@ onUnmounted(() => {
       <NH1>one-websocket-page</NH1>
       <n-form ref="formRef" class="form" :model="formValue" label-placement="left">
         <n-form-item>
-          <n-input v-model:value="formValue.socketUrl" placeholder=" ws://192.16.6.44:8088/scada/pullWaterLabel" />
+          <n-input
+            v-model:value="formValue.socketUrl"
+            placeholder=" ws://192.16.6.44:8088/scada/pullWaterLabel"
+            :disabled="Boolean(socket)"
+          />
         </n-form-item>
         <n-form-item>
           <div class="button-list">
@@ -132,7 +158,7 @@ onUnmounted(() => {
               <template #header>
                 <div class="message-header">
                   <n-time :time="item.time" type="datetime" />
-                  <n-icon :component="CopyOutline" @click="handleCopy(item.data)"></n-icon>
+                  <n-icon :component="CopyOutline" :data-clipboard-text="item.data"></n-icon>
                 </div>
               </template>
             </n-timeline-item>
